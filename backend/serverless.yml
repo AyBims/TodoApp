@@ -64,10 +64,10 @@ functions:
         - dynamodb:Scan
       Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
     - Effect: Allow
-        Action:
-          - xray:PutTraceSegments
-        Resource: 
-          - '*'
+      Action:
+        - xray:PutTraceSegments
+      Resource: 
+        - '*'
 
   # TODO: Configure this function - 
   # Provide iamRoleStatements property. Decide the Actions and AWS Resource. 
@@ -91,10 +91,10 @@ functions:
         - dynamodb:PutItem
       Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
     - Effect: Allow
-        Action:
-          - xray:PutTraceSegments
-        Resource: 
-          - '*'
+      Action:
+        - xray:PutTraceSegments
+      Resource: 
+        - '*'
 
   # TODO: Configure this function
   # Provide property for setting up CORS, Authorizer, iamRoleStatements, and request schemas
@@ -117,10 +117,10 @@ functions:
         - dynamodb:UpdateItem
       Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
     - Effect: Allow
-        Action:
-          - xray:PutTraceSegments
-        Resource: 
-          - '*'
+      Action:
+        - xray:PutTraceSegments
+      Resource: 
+        - '*'
 
   # TODO: Configure this function
   # Provide property for setting up CORS, Authorizer, iamRoleStatements
@@ -139,10 +139,10 @@ functions:
         - dynamodb:DeleteItem
       Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
     - Effect: Allow
-        Action:
-          - xray:PutTraceSegments
-        Resource: 
-          - '*'
+      Action:
+        - xray:PutTraceSegments
+      Resource: 
+        - '*'
 
   # TODO: Configure this function
   # Provide property for setting up CORS, Authorizer, iamRoleStatements
