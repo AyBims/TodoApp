@@ -14,8 +14,10 @@ const todoDBIndex = process.env.TODOS_CREATED_AT_INDEX;
 // TODO: Implement the dataLayer logic
 export class TodoAccess {
     constructor(
-      private readonly docClient: DocumentClient = createDynamoDBClient(),
-      private readonly todosTable = process.env.TODOS_TABLE
+      private readonly docClient: DocumentClient =  new DocumentClient(),
+      private readonly todosTable = process.env.TODOS_TABLE,
+      private readonly bucketName = process.env.ATTACHMENT_S3_BUCKET,
+      private readonly urlExpiration = process.env.SIGNED_URL_EXPIRATION
     ) {}
   
     async getAllUserTodos(userId: string): Promise<TodoItem[]> {
@@ -108,6 +110,44 @@ export class TodoAccess {
         })
         .promise();
     }
+
+    async persistAttachmentUrl(todoId: string, userId: string, imageId: string): Promise<void> {
+      logger.info('Persisting an attachment url')
+      await this.docClient.update({
+          TableName: this.todosTable,
+          Key: {
+              todoId,
+              userId
+          },
+          UpdateExpression: 'set attachmentUrl = :a',
+          ExpressionAttributeValues: {
+              ':a': `https://${this.bucketName}.s3.amazonaws.com/${imageId}`
+          }
+      }).promise()
+  }
+
+  async generateUploadUrl(todoId: string, userId: string): Promise<string> {
+      logger.info('Generating an upload url')
+      const s3 = new XAWS.S3({
+          signatureVersion: 'v4'
+      })
+      const uploadUrl = s3.getSignedUrl("putObject", {
+          Bucket: this.bucketName,
+          Key: todoId,
+          Expires: parseInt(this.urlExpiration)
+      });
+      await this.docClient.update({
+          TableName: this.todosTable,
+          Key: { userId, todoId },
+          UpdateExpression: "set attachmentUrl=:URL",
+          ExpressionAttributeValues: {
+              ":URL": uploadUrl.split("?")[0]
+          },
+          ReturnValues: "UPDATED_NEW"
+      })
+          .promise();
+      return uploadUrl;
+  }
   
   
     async updateTodoImageAttribute(todoId: string, userId: string, attachmentUrl: string) {
@@ -144,7 +184,5 @@ export class TodoAccess {
     }
 }
   
-function createDynamoDBClient() {
-    return new XAWS.DynamoDB.DocumentClient();
-}
+
   
